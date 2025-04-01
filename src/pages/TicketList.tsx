@@ -39,8 +39,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { exportToExcel } from "@/lib/utils/exportToExcel";
 import { toast } from "sonner";
-import { sendManualReminder, checkAndSendReminders } from "@/lib/services/reminderService";
+import { sendManualReminder } from "@/lib/services/reminderService";
 import { useState } from "react";
+
+interface TicketWithExternalId {
+  id: string;
+  externalId?: string;
+  ticketOpened: boolean;
+  [key: string]: any;
+}
 
 const TicketList = () => {
   const { 
@@ -105,10 +112,6 @@ const TicketList = () => {
     }
   };
 
-  const handleEditTicket = (ticketId: string) => {
-    navigate(`/tickets/edit/${ticketId}`);
-  };
-
   const handleEditExternalId = (ticketId: string) => {
     setEditingExternalId(ticketId);
     setNewExternalId("");
@@ -116,7 +119,18 @@ const TicketList = () => {
 
   const handleSaveExternalId = async (ticketId: string) => {
     try {
-      await updateTicket(ticketId, { externalId: newExternalId });
+      const ticket = tickets.find(t => t.id === ticketId);
+      if (!ticket) return;
+
+      const updateData = {
+        updatedAt: new Date().toISOString()
+      };
+
+      if (newExternalId) {
+        Object.assign(updateData, { externalId: newExternalId });
+      }
+
+      await updateTicket(ticketId, updateData);
       setEditingExternalId(null);
       toast.success("ID de referência atualizado com sucesso!");
     } catch (error) {
@@ -281,7 +295,7 @@ const TicketList = () => {
                           className="h-8 px-2 font-mono"
                           onClick={() => handleEditExternalId(ticket.id)}
                         >
-                          {ticket.externalId || "Adicionar ID"}
+                          {(ticket as TicketWithExternalId).externalId || "Adicionar ID"}
                         </Button>
                       )
                     )}
