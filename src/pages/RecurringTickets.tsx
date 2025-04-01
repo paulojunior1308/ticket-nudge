@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, CheckCircle } from "lucide-react";
+import { AlertTriangle, CheckCircle, Download } from "lucide-react";
+import { exportToExcel } from "@/lib/utils/exportToExcel";
 
 const RecurringTickets = () => {
   const { tickets, isLoading, updateTicket } = useData();
@@ -36,17 +37,27 @@ const RecurringTickets = () => {
     updateTicket(id, { ticketOpened: true });
   };
 
+  const handleExportToExcel = () => {
+    exportToExcel(recurringTickets);
+  };
+
   if (isLoading) {
     return <div>Carregando...</div>;
   }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Atendimentos Reincidentes</h1>
-        <p className="text-muted-foreground mt-1">
-          Usuários com 3 ou mais lembretes enviados
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Atendimentos Reincidentes</h1>
+          <p className="text-muted-foreground mt-1">
+            Usuários com 3 ou mais lembretes enviados
+          </p>
+        </div>
+        <Button onClick={handleExportToExcel} variant="outline">
+          <Download className="mr-2 h-4 w-4" />
+          Exportar Lista
+        </Button>
       </div>
 
       <Card>

@@ -8,6 +8,7 @@ import Dashboard from "@/pages/Dashboard";
 import AddTicket from "@/pages/AddTicket";
 import NotFound from "@/pages/NotFound";
 import ChangePassword from "@/pages/ChangePassword";
+import ForgotPassword from "@/pages/ForgotPassword";
 import { Toaster } from "@/components/ui/sonner";
 import RecurringTickets from "@/pages/RecurringTickets";
 import TicketList from "@/pages/TicketList";
@@ -31,6 +32,7 @@ function App() {
         <DataProvider>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route element={
               <PrivateRoute>
                 <Layout>

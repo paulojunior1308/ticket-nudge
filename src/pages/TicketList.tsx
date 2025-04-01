@@ -1,6 +1,6 @@
 import { useData } from "@/lib/context/DataContext";
 import { Button } from "@/components/ui/button";
-import { Plus, Check, X, Trash2, Download, AlertTriangle, Mail, Pencil } from "lucide-react";
+import { Plus, Check, X, Trash2, AlertTriangle, Mail, Pencil } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Table,
@@ -37,7 +37,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { exportToExcel } from "@/lib/utils/exportToExcel";
 import { toast } from "sonner";
 import { sendManualReminder } from "@/lib/services/reminderService";
 import { useState } from "react";
@@ -98,10 +97,6 @@ const TicketList = () => {
     setFilterOptions(prev => ({ ...prev, status: value }));
   };
 
-  const handleExportToExcel = () => {
-    exportToExcel(tickets);
-  };
-
   const handleSendManualReminder = async (ticketId: string) => {
     try {
       await sendManualReminder(ticketId);
@@ -158,10 +153,6 @@ const TicketList = () => {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={handleExportToExcel} variant="outline">
-            <Download className="mr-2 h-4 w-4" />
-            Exportar
-          </Button>
           <Button asChild>
             <Link to="/tickets/new">
               <Plus className="mr-2 h-4 w-4" />
