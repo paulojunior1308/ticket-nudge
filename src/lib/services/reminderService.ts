@@ -47,9 +47,20 @@ const createEmailParams = (ticket: Ticket, reminderCount: number): EmailTemplate
 });
 
 const validateEnvironmentVars = () => {
-  if (!import.meta.env.VITE_EMAILJS_SERVICE_ID || !import.meta.env.VITE_EMAILJS_TEMPLATE_ID) {
-    throw new Error('Variáveis de ambiente do EmailJS não configuradas');
+  const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+  const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+  const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+
+  if (!serviceId || !templateId || !publicKey) {
+    const missingVars = [];
+    if (!serviceId) missingVars.push('VITE_EMAILJS_SERVICE_ID');
+    if (!templateId) missingVars.push('VITE_EMAILJS_TEMPLATE_ID');
+    if (!publicKey) missingVars.push('VITE_EMAILJS_PUBLIC_KEY');
+    
+    throw new Error(`Variáveis de ambiente do EmailJS não configuradas: ${missingVars.join(', ')}`);
   }
+
+  return { serviceId, templateId, publicKey };
 };
 
 const updateTicketReminder = async (ticketId: string, reminderCount: number) => {
@@ -80,16 +91,19 @@ const sendReminderEmail = async (ticket: Ticket): Promise<ReminderResult> => {
       };
     }
 
-    validateEnvironmentVars();
+    const { serviceId, templateId } = validateEnvironmentVars();
     
     const newReminderCount = (ticket.reminderCount || 0) + 1;
     const templateParams = createEmailParams(ticket, newReminderCount);
     
     console.log(`Preparando envio para ticket ${ticket.id} - Status: ${ticket.status}`);
+    console.log('Parâmetros do template:', templateParams);
+    console.log('Service ID:', serviceId);
+    console.log('Template ID:', templateId);
     
     await emailjs.send(
-      import.meta.env.VITE_EMAILJS_SERVICE_ID,
-      import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+      serviceId,
+      templateId,
       templateParams
     );
     
@@ -104,11 +118,29 @@ const sendReminderEmail = async (ticket: Ticket): Promise<ReminderResult> => {
     };
   } catch (error) {
     console.error(`✗ Erro ao enviar lembrete para ${ticket.email}:`, error);
+    
+    let errorMessage = 'Erro desconhecido';
+    if (error instanceof Error) {
+      if (error.message.includes('template ID not found')) {
+        errorMessage = 'ID do template do EmailJS não encontrado. Verifique se o ID está correto no painel do EmailJS.';
+      } else if (error.message.includes('service ID not found')) {
+        errorMessage = 'ID do serviço do EmailJS não encontrado. Verifique se o ID está correto no painel do EmailJS.';
+      } else if (error.message.includes('426')) {
+        errorMessage = 'Erro de configuração do EmailJS. Verifique as variáveis de ambiente.';
+      } else if (error.message.includes('429')) {
+        errorMessage = 'Limite de envio de emails atingido. Tente novamente mais tarde.';
+      } else if (error.message.includes('400')) {
+        errorMessage = 'Erro de validação do EmailJS. Verifique se todos os parâmetros do template estão corretos.';
+      } else {
+        errorMessage = error.message;
+      }
+    }
+    
     return {
       success: false,
       email: ticket.email,
       name: ticket.name,
-      error: error instanceof Error ? error : new Error('Erro desconhecido')
+      error: new Error(errorMessage)
     };
   }
 };
