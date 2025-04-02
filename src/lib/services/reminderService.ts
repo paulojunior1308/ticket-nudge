@@ -9,18 +9,14 @@ import { toast } from 'sonner';
 // Tipos
 interface EmailTemplateParams {
   [key: string]: string | number;
-  to_name: string;
-  to_email: string;
-  email: string;
   name: string;
+  email: string;
   service_date: string;
   department: string;
   problem: string;
   analyst: string;
-  reminder_count: number;
   from_name: string;
   reply_to: string;
-  from_email: string;
 }
 
 interface ReminderResult {
@@ -31,19 +27,15 @@ interface ReminderResult {
 }
 
 // Funções auxiliares
-const createEmailParams = (ticket: Ticket, reminderCount: number): EmailTemplateParams => ({
-  to_name: ticket.name,
-  to_email: ticket.email,
-  email: ticket.email,
+const createEmailParams = (ticket: Ticket): EmailTemplateParams => ({
   name: ticket.name,
+  email: ticket.email,
   service_date: format(new Date(ticket.serviceDate), 'dd/MM/yyyy', { locale: ptBR }),
   department: ticket.department,
   problem: ticket.problem || 'Não especificado',
-  analyst: ticket.analyst,
-  reminder_count: reminderCount,
+  analyst: ticket.analyst || 'Não especificado',
   from_name: "Suporte TI - SESC Pompeia",
-  reply_to: 'nti.pompeia@sescsp.org.br',
-  from_email: 'nti.pompeia@sescsp.org.br'
+  reply_to: 'nti.pompeia@sescsp.org.br'
 });
 
 const validateEnvironmentVars = () => {
@@ -94,18 +86,20 @@ const sendReminderEmail = async (ticket: Ticket): Promise<ReminderResult> => {
     const { serviceId, templateId } = validateEnvironmentVars();
     
     const newReminderCount = (ticket.reminderCount || 0) + 1;
-    const templateParams = createEmailParams(ticket, newReminderCount);
+    const templateParams = createEmailParams(ticket);
     
     console.log(`Preparando envio para ticket ${ticket.id} - Status: ${ticket.status}`);
-    console.log('Parâmetros do template:', templateParams);
+    console.log('Parâmetros do template:', JSON.stringify(templateParams, null, 2));
     console.log('Service ID:', serviceId);
     console.log('Template ID:', templateId);
     
-    await emailjs.send(
+    const response = await emailjs.send(
       serviceId,
       templateId,
       templateParams
     );
+    
+    console.log('Resposta do EmailJS:', response);
     
     await updateTicketReminder(ticket.id, newReminderCount);
     
@@ -129,6 +123,8 @@ const sendReminderEmail = async (ticket: Ticket): Promise<ReminderResult> => {
         errorMessage = 'Erro de configuração do EmailJS. Verifique as variáveis de ambiente.';
       } else if (error.message.includes('429')) {
         errorMessage = 'Limite de envio de emails atingido. Tente novamente mais tarde.';
+      } else if (error.message.includes('422')) {
+        errorMessage = 'Erro de validação dos parâmetros do email. Verifique se todos os campos obrigatórios estão preenchidos.';
       } else if (error.message.includes('400')) {
         errorMessage = 'Erro de validação do EmailJS. Verifique se todos os parâmetros do template estão corretos.';
       } else {
