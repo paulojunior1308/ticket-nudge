@@ -25,10 +25,11 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
 import emailjs from "@emailjs/browser";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { testConnection } from "@/lib/services/email";
+import { userSuggestions, addUserSuggestion } from "@/lib/data/users";
 
-// Inicializa o EmailJS (adicione isso no topo do arquivo, após os imports)
+// Inicializa o EmailJS
 emailjs.init(import.meta.env.VITE_EMAILJS_PUBLIC_KEY);
 
 const formSchema = z.object({
@@ -53,6 +54,8 @@ const analysts = [
 const AddTicket = () => {
   const navigate = useNavigate();
   const { addTicket } = useData();
+  const [filteredUsers, setFilteredUsers] = useState(userSuggestions);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -67,6 +70,23 @@ const AddTicket = () => {
       analyst: ""
     },
   });
+
+  // Função para filtrar usuários baseado no input
+  const handleNameInput = (value: string) => {
+    const filtered = userSuggestions.filter(user =>
+      user.name.toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredUsers(filtered);
+    setShowSuggestions(true);
+  };
+
+  // Função para selecionar um usuário da lista
+  const handleUserSelect = (user: typeof userSuggestions[0]) => {
+    form.setValue("name", user.name);
+    form.setValue("email", user.email);
+    form.setValue("department", user.department);
+    setShowSuggestions(false);
+  };
 
   useEffect(() => {
     testConnection().then(success => {
@@ -118,7 +138,14 @@ const AddTicket = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      // Primeiro adiciona o ticket
+      // Adiciona o usuário à lista de sugestões
+      addUserSuggestion({
+        name: values.name,
+        email: values.email,
+        department: values.department
+      });
+
+      // Adiciona o ticket
       await addTicket({
         ...values,
         serviceDate: values.serviceDate.toISOString(),
@@ -127,7 +154,7 @@ const AddTicket = () => {
         reminderCount: 0
       });
 
-      // Depois tenta enviar o email
+      // Envia o email
       await sendEmail(values);
       
       toast.success("Atendimento registrado com sucesso!");
@@ -148,10 +175,34 @@ const AddTicket = () => {
             control={form.control}
             name="name"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="relative">
                 <FormLabel>Nome</FormLabel>
                 <FormControl>
-                  <Input placeholder="Nome do usuário" {...field} />
+                  <div className="relative">
+                    <Input 
+                      placeholder="Digite ou selecione um nome" 
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        handleNameInput(e.target.value);
+                      }}
+                      onFocus={() => setShowSuggestions(true)}
+                    />
+                    {showSuggestions && field.value && filteredUsers.length > 0 && (
+                      <div className="absolute w-full mt-1 max-h-48 overflow-auto bg-white border rounded-md shadow-lg z-50">
+                        {filteredUsers.map((user) => (
+                          <div
+                            key={`${user.name}-${user.email}`}
+                            className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                            onClick={() => handleUserSelect(user)}
+                          >
+                            <div className="font-medium">{user.name}</div>
+                            <div className="text-sm text-gray-500">{user.email}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -178,7 +229,7 @@ const AddTicket = () => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Departamento</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione o departamento" />
