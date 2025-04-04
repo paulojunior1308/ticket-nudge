@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { useAuth } from "@/lib/context/AuthContext";
-import { useNavigate, Link, Outlet } from "react-router-dom";
+import { useNavigate, Link, Outlet, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -8,12 +8,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { 
-  LayoutDashboard, 
-  FileText, 
-  Users,  
-  LogOut
-} from "lucide-react";
+import { LogOut } from "lucide-react";
+import { Sidebar } from "@/components/Sidebar";
+import { MenuButton } from "@/components/ui/menu-button";
+import { cn } from "@/lib/utils";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -22,6 +20,13 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Fechar menu quando a rota mudar
+  React.useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location]);
 
   const handleLogout = async () => {
     await logout();
@@ -38,37 +43,33 @@ const Layout: React.FC<LayoutProps> = () => {
       .toUpperCase();
   };
 
-  const navigationItems = [
-    { name: "Dashboard", path: "/dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
-    { name: "Atendimentos", path: "/tickets", icon: <FileText className="w-5 h-5" /> },
-    { name: "Reincidentes", path: "/recurring", icon: <Users className="w-5 h-5" /> },
-  ];
-
   return (
     <div className="min-h-screen flex">
+      {/* Mobile Menu Button */}
+      <div className={cn(
+        "fixed top-4 z-50 transition-all duration-300",
+        isMobileMenuOpen ? "left-48" : "left-4"
+      )}>
+        <MenuButton
+          isOpen={isMobileMenuOpen}
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          aria-label="Toggle menu"
+        />
+      </div>
+
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r">
-        <div className="h-16 flex items-center px-6 border-b">
-          <Link to="/dashboard" className="text-xl font-bold text-primary">
-            NTI Pompeia
-          </Link>
-        </div>
-        <nav className="p-4 space-y-2">
-          {navigationItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-700"
-            >
-              {item.icon}
-              <span>{item.name}</span>
-            </Link>
-          ))}
-        </nav>
-      </aside>
+      <div className={cn(
+        "lg:block fixed top-0 left-0 h-full transition-transform duration-300 z-40",
+        isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+      )}>
+        <Sidebar />
+      </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className={cn(
+        "flex-1 flex flex-col transition-all duration-300",
+        isMobileMenuOpen ? "ml-64" : "ml-0 lg:ml-64"
+      )}>
         <header className="h-16 border-b bg-white flex items-center justify-end px-6">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

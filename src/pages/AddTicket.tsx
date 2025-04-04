@@ -151,7 +151,9 @@ const AddTicket = () => {
         serviceDate: values.serviceDate.toISOString(),
         status: values.status,
         ticketOpened: false,
-        reminderCount: 0
+        reminderCount: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       });
 
       // Envia o email
@@ -236,6 +238,7 @@ const AddTicket = () => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
+                    <SelectItem value="Alimentação">Alimentação</SelectItem>
                     <SelectItem value="Almoxarifado Geral">Almoxarifado Geral</SelectItem>
                     <SelectItem value="Almoxarifado Generos">Almoxarifado Generos</SelectItem>
                     <SelectItem value="Atendimento">Atendimento</SelectItem>
@@ -250,10 +253,11 @@ const AddTicket = () => {
                     <SelectItem value="Esportivo">Esportivo</SelectItem>
                     <SelectItem value="Infraestrutura">Infraestrutura</SelectItem>
                     <SelectItem value="Loja">Loja</SelectItem>
+                    <SelectItem value="NTI">NTI</SelectItem>
                     <SelectItem value="Nutricionistas">Nutricionistas</SelectItem>
+                    <SelectItem value="Odontologia">Odontologia</SelectItem>
                     <SelectItem value="Piscina">Piscina</SelectItem>
                     <SelectItem value="Programação">Programação</SelectItem>
-                    <SelectItem value="Odontologia">Odontologia</SelectItem>
                     <SelectItem value="RH">RH</SelectItem>
                     <SelectItem value="Secretaria">Secretaria</SelectItem>
                     <SelectItem value="Serviços">Serviços</SelectItem>
@@ -273,8 +277,15 @@ const AddTicket = () => {
                 <FormLabel>Data do Atendimento</FormLabel>
                 <FormControl>
                   <Calendar
-                    value={field.value}
-                    onChange={field.onChange}
+                    mode="single"
+                    selected={field.value}
+                    onSelect={(date) => {
+                      if (date) {
+                        field.onChange(date);
+                      }
+                    }}
+                    disabled={(date) => date > new Date()}
+                    initialFocus
                   />
                 </FormControl>
                 <FormMessage />

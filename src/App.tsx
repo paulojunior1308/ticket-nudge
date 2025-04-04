@@ -15,6 +15,8 @@ import TicketList from "@/pages/TicketList";
 import { startReminderScheduler } from '@/lib/services/scheduler';
 import { useEffect } from "react";
 import EditTicketPage from "./pages/tickets/edit/[id]";
+import LaptopLoanList from "./pages/LaptopLoanList";
+import NewLaptopLoan from "./pages/NewLaptopLoan";
 
 function App() {
   useEffect(() => {
@@ -49,6 +51,10 @@ function App() {
               </Route>
               <Route path="recurring" element={<RecurringTickets />} />
               <Route path="change-password" element={<ChangePassword />} />
+              <Route path="laptop-loan">
+                <Route index element={<LaptopLoanList />} />
+                <Route path="new" element={<NewLaptopLoan />} />
+              </Route>
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

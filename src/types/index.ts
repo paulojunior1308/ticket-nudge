@@ -43,3 +43,38 @@ export interface FilterOptions {
   endDate?: string;
   recurring: boolean;
 }
+
+export interface LaptopLoan {
+  id: string;
+  laptopId: string;
+  userName: string;
+  registrationNumber: string; // chapa
+  location: string;
+  hasPointer: boolean;
+  signature: string; // URL da assinatura no Firebase Storage
+  loanDate: string;
+  returnDate?: string;
+  isReturned: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Laptop {
+  id: string;
+  model: string;
+  serialNumber: string;
+  isAvailable: boolean;
+}
+
+export const PREDEFINED_LOCATIONS = [
+  "Auditório",
+  "Comedoria",
+  "Sala de Reunião 1",
+  "Sala de Reunião 2",
+  "Sala de Reunião 3",
+  "Espaço de Tecnologias",
+  "Área de Convivência",
+  "Teatro"
+] as const;
+
+export type PredefinedLocation = typeof PREDEFINED_LOCATIONS[number];

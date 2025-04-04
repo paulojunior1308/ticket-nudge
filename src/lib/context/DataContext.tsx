@@ -1,6 +1,7 @@
-import { createContext, useContext, useState, useEffect, useMemo } from "react";
+import { createContext, useContext, useState, useEffect, useMemo, ReactNode } from "react";
 import { Ticket, EmailTemplate } from "@/types";
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { LaptopLoan } from "@/lib/constants/laptops";
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { format } from 'date-fns';
 import { toast } from "sonner";
@@ -29,14 +30,15 @@ interface DataContextType {
   setSortField: React.Dispatch<React.SetStateAction<keyof Ticket>>;
   sortDirection: 'asc' | 'desc';
   setSortDirection: React.Dispatch<React.SetStateAction<'asc' | 'desc'>>;
-  addTicket: (ticketData: Omit<Ticket, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  addTicket: (ticket: Omit<Ticket, "id">) => Promise<void>;
   updateTicket: (id: string, data: Partial<Ticket>) => Promise<void>;
   deleteTicket: (id: string) => Promise<void>;
-  addEmailTemplate: (templateData: Omit<EmailTemplate, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  addEmailTemplate: (template: Omit<EmailTemplate, "id">) => Promise<void>;
   updateEmailTemplate: (id: string, data: Partial<EmailTemplate>) => Promise<void>;
   deleteEmailTemplate: (id: string) => Promise<void>;
   exportToCSV: () => void;
   error: string | null;
+  addLaptopLoan: (loan: Omit<LaptopLoan, "id">) => Promise<void>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -49,7 +51,7 @@ export const useData = () => {
   return context;
 };
 
-export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -231,6 +233,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     document.body.removeChild(link);
   };
 
+  const addLaptopLoan = async (loan: Omit<LaptopLoan, "id">) => {
+    try {
+      await addDoc(collection(db, "laptopLoans"), {
+        ...loan,
+        createdAt: Timestamp.now().toDate().toISOString(),
+        updatedAt: Timestamp.now().toDate().toISOString(),
+      });
+    } catch (error) {
+      console.error("Error adding laptop loan:", error);
+      throw error;
+    }
+  };
+
   return (
     <DataContext.Provider value={{
       tickets: filteredTickets,
@@ -251,7 +266,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updateEmailTemplate,
       deleteEmailTemplate,
       exportToCSV,
-      error
+      error,
+      addLaptopLoan
     }}>
       {children}
     </DataContext.Provider>
