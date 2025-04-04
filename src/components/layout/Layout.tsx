@@ -47,7 +47,7 @@ const Layout: React.FC<LayoutProps> = () => {
     <div className="min-h-screen flex">
       {/* Mobile Menu Button */}
       <div className={cn(
-        "fixed top-4 z-50 transition-all duration-300",
+        "fixed top-4 z-50 transition-all duration-300 lg:hidden",
         isMobileMenuOpen ? "left-48" : "left-4"
       )}>
         <MenuButton
