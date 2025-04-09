@@ -38,8 +38,9 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { sendManualReminder } from "@/lib/services/reminderService";
 import { useState } from "react";
+import { sendEmail } from "@/services/emailService";
+import { emailTemplate, replaceTemplateVariables } from "@/lib/templates/emailTemplate";
 
 interface TicketWithExternalId {
   id: string;
@@ -99,7 +100,35 @@ const TicketList = () => {
 
   const handleSendManualReminder = async (ticketId: string) => {
     try {
-      await sendManualReminder(ticketId);
+      const ticket = tickets.find(t => t.id === ticketId);
+      if (!ticket) {
+        throw new Error('Ticket não encontrado');
+      }
+
+      // Formatar a data para o formato brasileiro
+      const serviceDate = new Date(ticket.serviceDate).toLocaleDateString('pt-BR');
+      
+      // Preparar as variáveis para o template
+      const variables = {
+        name: ticket.name,
+        analyst: ticket.analyst || 'Analista de Suporte',
+        service_date: serviceDate,
+        department: ticket.department,
+        problem: ticket.problem || 'Não especificado'
+      };
+      
+      // Substituir as variáveis no template
+      const emailMessage = replaceTemplateVariables(emailTemplate, variables);
+
+      // Enviar o email
+      await sendEmail(ticket.email, 'Lembrete de Chamado', emailMessage);
+      
+      // Atualiza o contador de lembretes
+      await updateTicket(ticketId, {
+        reminderCount: (ticket.reminderCount || 0) + 1,
+        lastReminderSent: new Date().toISOString()
+      });
+
       toast.success("Lembrete enviado com sucesso!");
     } catch (error) {
       console.error("Erro ao enviar lembrete:", error);

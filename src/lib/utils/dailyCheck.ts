@@ -1,19 +1,23 @@
 import { getTickets } from '@/lib/services/firebase';
 import { sendReminderEmail } from '@/lib/services/email';
+import { Ticket } from "@/types";
 
-export async function checkAndSendReminders(): Promise<void> {
+export async function checkAndSendReminders(tickets: Ticket[]): Promise<void> {
   try {
-    const tickets = await getTickets();
     const now = new Date();
+    const threeDaysAgo = new Date(now.setDate(now.getDate() - 3));
 
     for (const ticket of tickets) {
-      if (!ticket.ticketOpened) {
-        const lastReminder = ticket.lastReminderSent ? new Date(ticket.lastReminderSent) : null;
-        const shouldSendReminder = !lastReminder || (now.getTime() - lastReminder.getTime() > 24 * 60 * 60 * 1000);
-
-        if (shouldSendReminder) {
-          await sendReminderEmail(ticket);
-        }
+      if (
+        ticket.status === "Pendente" &&
+        new Date(ticket.createdAt) <= threeDaysAgo &&
+        ticket.reminderCount < 3
+      ) {
+        await sendReminderEmail(
+          ticket.email,
+          "Lembrete: Ticket Pendente",
+          `Olá ${ticket.name}, seu ticket ainda está pendente. Por favor, verifique o status.`
+        );
       }
     }
   } catch (error) {

@@ -84,3 +84,73 @@ O sistema utiliza o Nodemailer para envio de emails. Configure as seguintes vari
 ## Licença
 
 Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
+
+# Ticket Nudge
+
+Sistema de gerenciamento de tickets e empréstimos de laptops.
+
+## Deploy no Render
+
+### Pré-requisitos
+
+1. Conta no [Render](https://render.com/)
+2. Repositório Git com o código do projeto
+
+### Passos para Deploy
+
+1. Faça login no Render
+2. Clique em "New" e selecione "Web Service"
+3. Conecte seu repositório Git
+4. Configure o serviço:
+   - **Name**: ticket-nudge-server
+   - **Environment**: Node
+   - **Build Command**: `cd server && npm install`
+   - **Start Command**: `cd server && node server.js`
+   - **Plan**: Free (ou outro de sua preferência)
+
+5. Configure as variáveis de ambiente:
+   - VITE_FIREBASE_PROJECT_ID
+   - FIREBASE_CLIENT_EMAIL
+   - FIREBASE_PRIVATE_KEY_ID
+   - FIREBASE_CLIENT_ID
+   - FIREBASE_PRIVATE_KEY
+   - VITE_EMAIL_USER
+   - VITE_EMAIL_PASSWORD
+   - PORT (definido como 10000)
+
+6. Clique em "Create Web Service"
+
+### Alternativa: Usando render.yaml
+
+Você também pode usar o arquivo `render.yaml` incluído no projeto para configurar o deploy automaticamente:
+
+1. Faça login no Render
+2. Clique em "New" e selecione "Blueprint"
+3. Conecte seu repositório Git
+4. O Render detectará automaticamente o arquivo `render.yaml` e configurará o serviço
+
+### Importante
+
+- Certifique-se de que todas as variáveis de ambiente estejam configuradas corretamente
+- A chave privada do Firebase deve ser formatada corretamente (com quebras de linha)
+- O servidor será acessível através da URL fornecida pelo Render
+
+## Desenvolvimento Local
+
+Para executar o projeto localmente:
+
+1. Clone o repositório
+2. Instale as dependências:
+   ```
+   npm install
+   cd server && npm install
+   ```
+3. Configure as variáveis de ambiente no arquivo `.env` na pasta `server`
+4. Inicie o servidor:
+   ```
+   cd server && npm start
+   ```
+5. Inicie o frontend:
+   ```
+   npm run dev
+   ```

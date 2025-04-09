@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: ticket-nudge-server
+    env: node
+    buildCommand: cd server && npm install
+    startCommand: cd server && node server.js
+    envVars:
+      - key: VITE_FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_CLIENT_EMAIL
+        sync: false
+      - key: FIREBASE_PRIVATE_KEY_ID
+        sync: false
+      - key: FIREBASE_CLIENT_ID
+        sync: false
+      - key: FIREBASE_PRIVATE_KEY
+        sync: false
+      - key: VITE_EMAIL_USER
+        sync: false
+      - key: VITE_EMAIL_PASSWORD
+        sync: false
+      - key: PORT
+        value: 10000 

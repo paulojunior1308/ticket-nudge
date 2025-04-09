@@ -29,16 +29,16 @@ export function Sidebar() {
   ];
 
   return (
-    <div className="flex flex-col h-screen">
-      <div className="border-b">
+    <div className="flex flex-col h-screen bg-gray-900 border-r border-gray-800">
+      <div className="border-b border-gray-800">
         <div className="flex h-16 items-center px-4">
-          <Link to="/" className="font-bold text-xl text-primary">
+          <Link to="/" className="font-bold text-xl text-white">
             NTI Pompeia
           </Link>
         </div>
       </div>
-      <div className="flex-1 overflow-auto py-2">
-        <nav className="grid items-start px-4 text-sm font-medium">
+      <div className="flex-1 overflow-auto py-4">
+        <nav className="grid items-start px-4 text-sm font-medium gap-1">
           {sidebarLinks.map((link) => {
             const Icon = link.icon;
             const isActive = location.pathname === link.href;
@@ -48,11 +48,11 @@ export function Sidebar() {
                 key={link.href}
                 to={link.href}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50",
-                  isActive && "text-gray-900 dark:text-gray-50"
+                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-400 transition-all hover:bg-gray-800 hover:text-white",
+                  isActive && "bg-gray-800 text-white"
                 )}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-5 w-5" />
                 {link.label}
               </Link>
             );

@@ -192,8 +192,8 @@ const Tickets = () => {
       </Card>
 
       {/* Table */}
-      <Card className="border-border/60 overflow-hidden">
-        <div className="flex justify-between items-center p-4 border-b border-border">
+      <Card className="border border-[hsl(var(--border))] opacity-60 overflow-hidden">
+        <div className="flex justify-between items-center p-4 border-b border-[hsl(var(--border))]">
           <div className="text-sm text-muted-foreground">
             {isLoading ? (
               <span>Carregando atendimentos...</span>

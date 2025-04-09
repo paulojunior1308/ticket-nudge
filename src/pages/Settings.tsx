@@ -224,7 +224,7 @@ const Settings = () => {
                     </p>
                   </div>
                   
-                  <div className="border border-border p-4 rounded-md bg-muted/30 mt-4">
+                  <div className="border border-[hsl(var(--border))] p-4 rounded-md bg-muted/30 mt-4">
                     <p className="text-sm text-muted-foreground italic">
                       Nota: Estas configurações são definidas globalmente para o sistema e não podem 
                       ser alteradas por usuários individuais. Para solicitar alterações, entre em 
@@ -286,10 +286,10 @@ const Settings = () => {
                   </div>
                 </form>
                 
-                <div className="mt-8 pt-6 border-t border-border">
+                <div className="mt-8 pt-6 border-t border-[hsl(var(--border))]">
                   <h3 className="text-lg font-medium mb-4">Sessões Ativas</h3>
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center p-3 border border-border rounded-md">
+                    <div className="flex justify-between items-center p-3 border border-[hsl(var(--border))] rounded-md">
                       <div>
                         <div className="font-medium">Este Dispositivo</div>
                         <div className="text-sm text-muted-foreground">Último acesso: Agora</div>

@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { useData } from "@/lib/context/DataContext";
 import { Button } from "@/components/ui/button";
@@ -91,7 +90,7 @@ const Recurring = () => {
         </Button>
       </div>
 
-      <Card className="border-border/60">
+      <Card className="border border-[hsl(var(--border))] opacity-60">
         <CardHeader>
           <CardTitle className="text-lg font-medium flex items-center">
             <AlertTriangle className="h-5 w-5 text-orange-500 mr-2" />

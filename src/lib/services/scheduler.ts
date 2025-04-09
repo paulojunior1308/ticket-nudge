@@ -1,60 +1,30 @@
-import { checkAndSendReminders } from './reminderService';
+import { sendEmail } from '@/services/emailService';
+
+const API_URL = 'http://localhost:10000';
 
 export const startReminderScheduler = () => {
-  console.log('Iniciando serviço de lembretes...', new Date().toLocaleString());
-  
-  const scheduleNextReminder = () => {
-    const now = new Date();
-    const nextRun = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-      10, // 10:00
-      0,  // 0 minutos
-      0
-    );
+  // Verifica se estamos no navegador
+  if (typeof window === 'undefined') return;
 
-    // Se já passou das 10:00 hoje, agende para amanhã
-    if (now >= nextRun) {
-      nextRun.setDate(nextRun.getDate() + 1);
+  // Agenda a verificação diária
+  const checkInterval = 24 * 60 * 60 * 1000; // 24 horas
+  setInterval(checkAndSendReminders, checkInterval);
+
+  // Executa a primeira verificação imediatamente
+  checkAndSendReminders();
+};
+
+const checkAndSendReminders = async () => {
+  try {
+    const response = await fetch(`${API_URL}/check-reminders`);
+    if (!response.ok) {
+      throw new Error('Erro ao verificar lembretes');
     }
-
-    const timeUntilNextRun = nextRun.getTime() - now.getTime();
-
-    console.log(`Próxima verificação agendada para: ${nextRun.toLocaleString()}`);
-    console.log(`Tempo até próxima execução: ${Math.floor(timeUntilNextRun / 1000 / 60)} minutos`);
-
-    setTimeout(async () => {
-      try {
-        console.log('Iniciando verificação de lembretes:', new Date().toLocaleString());
-        const results = await checkAndSendReminders();
-        console.log('Verificação de lembretes concluída com sucesso');
-        console.log('Lembretes enviados:', results?.length || 0);
-      } catch (error) {
-        console.error('Erro ao executar verificação de lembretes:', error);
-      } finally {
-        // Agenda a próxima execução
-        scheduleNextReminder();
-      }
-    }, timeUntilNextRun);
-  };
-
-  // Verifica se deve executar agora (para teste)
-  const now = new Date();
-  const currentHour = now.getHours();
-  const currentMinute = now.getMinutes();
-  
-  if (currentHour === 10 && currentMinute === 0) {
-    console.log('Executando verificação imediata...');
-    checkAndSendReminders().then(() => {
-      console.log('Verificação imediata concluída');
-    }).catch(error => {
-      console.error('Erro na verificação imediata:', error);
-    });
+    const data = await response.json();
+    console.log('Lembretes enviados:', data.reminders);
+  } catch (error) {
+    console.error('Erro ao enviar lembretes:', error);
   }
-
-  // Inicia o agendamento
-  scheduleNextReminder();
 };
 
 // Função para executar verificação manual

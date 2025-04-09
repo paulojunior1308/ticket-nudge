@@ -178,7 +178,7 @@ const Dashboard = () => {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="bg-card border-border/60 overflow-hidden">
+        <Card className="bg-card border border-[hsl(var(--border))] opacity-60 overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Total de Atendimentos</CardTitle>
             <Ticket className="h-4 w-4 text-muted-foreground" />
@@ -191,7 +191,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
         
-        <Card className="bg-card border-border/60 overflow-hidden">
+        <Card className="bg-card border border-[hsl(var(--border))] opacity-60 overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Chamados Abertos</CardTitle>
             <TicketCheck className="h-4 w-4 text-muted-foreground" />
@@ -208,7 +208,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
         
-        <Card className="bg-card border-border/60 overflow-hidden">
+        <Card className="bg-card border border-[hsl(var(--border))] opacity-60 overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Pendentes</CardTitle>
             <AlertCircle className="h-4 w-4 text-muted-foreground" />
@@ -223,7 +223,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
         
-        <Card className="bg-card border-border/60 overflow-hidden">
+        <Card className="bg-card border border-[hsl(var(--border))] opacity-60 overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Reincidentes</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />

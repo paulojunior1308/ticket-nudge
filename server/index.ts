@@ -1,5 +1,4 @@
 import express, { RequestHandler } from 'express';
-import { Request, Response } from 'express';
 import cors from 'cors';
 import { EmailService } from '../src/services/emailService';
 import { startDailyEmailReminder } from '../src/scripts/dailyEmailReminder';

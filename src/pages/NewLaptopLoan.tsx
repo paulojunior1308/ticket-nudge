@@ -1,4 +1,4 @@
-import { useForm } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRef, useState } from "react";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -24,20 +25,59 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { PREDEFINED_LOCATIONS, LAPTOPS, LaptopLoan } from "@/lib/constants/laptops";
+import { LaptopLoan } from "@/lib/constants/laptops";
 import { useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
 import { FileDown } from "lucide-react";
 
 const formSchema = z.object({
-  laptopId: z.string().min(1, "Selecione um notebook"),
-  userName: z.string().min(1, "Nome é obrigatório"),
-  registrationNumber: z.string().min(1, "Chapa é obrigatória"),
-  location: z.string().min(1, "Local é obrigatório"),
+  laptopId: z.string().min(1, {
+    message: "ID do laptop é obrigatório",
+  }),
+  userName: z.string().min(1, {
+    message: "Nome do usuário é obrigatório",
+  }),
+  registrationNumber: z.string().min(1, {
+    message: "Número de registro é obrigatório",
+  }),
+  location: z.string().min(1, {
+    message: "Localização é obrigatória",
+  }),
   hasPointer: z.boolean().default(false),
 });
 
-type FormValues = z.infer<typeof formSchema>;
+type FormData = z.infer<typeof formSchema>;
+
+// Lista predefinida de laptops
+const LAPTOPS = [
+  "351752",
+  "323817",
+  "351751",
+  "351749",
+  "351750",
+  "323818"
+];
+
+// Lista predefinida de localizações
+const LOCATIONS = [
+  "Espaço Cênico",
+  "Convivência",
+  "House Comedoria",
+  "House Teatro",
+  "Galpão",
+  "Ateliê Marcenaria",
+  "Ateliê Cerâmica",
+  "Ateliê Artes Mistas",
+  "Ateliê Costura",
+  "Ateliê Pintura",
+  "Ateliê Gravura",
+  "Ateliê Textil",
+  "7º Esportivo",
+  "8º Esportivo",
+  "9º Esportivo",
+  "10º Esportivo",
+  "11º Esportivo"
+];
 
 export default function NewLaptopLoan() {
   const signaturePadRef = useRef<SignaturePad>(null);
@@ -45,8 +85,8 @@ export default function NewLaptopLoan() {
   const { addLaptopLoan } = useData();
   const navigate = useNavigate();
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema) as any,
     defaultValues: {
       laptopId: "",
       userName: "",
@@ -63,20 +103,18 @@ export default function NewLaptopLoan() {
     }
   };
 
-  const onSubmit = async (values: FormValues) => {
+  const onSubmit: SubmitHandler<FormData> = async (values) => {
     try {
       if (isSignatureEmpty) {
         toast.error("Por favor, assine o termo de empréstimo");
         return;
       }
 
-      // Captura a assinatura como string base64
       const signatureData = signaturePadRef.current?.toDataURL() || "";
 
-      // Cria o empréstimo com a assinatura em base64
       const loan: Omit<LaptopLoan, "id"> = {
         ...values,
-        signature: signatureData, // Salva a assinatura diretamente como base64
+        signature: signatureData,
         loanDate: new Date().toISOString(),
         isReturned: false,
         createdAt: new Date().toISOString(),
@@ -84,9 +122,8 @@ export default function NewLaptopLoan() {
       };
 
       await addLaptopLoan(loan);
-
       toast.success("Empréstimo registrado com sucesso!");
-      navigate("/laptop-loan"); // Redireciona para a lista após salvar
+      navigate("/laptop-loan");
     } catch (error) {
       console.error("Erro ao registrar empréstimo:", error);
       toast.error("Erro ao registrar empréstimo");
@@ -96,7 +133,6 @@ export default function NewLaptopLoan() {
   const downloadTerm = () => {
     const doc = new jsPDF();
     const loan = form.getValues();
-    const laptop = LAPTOPS.find(l => l.id === loan.laptopId);
     const currentDate = new Date().toLocaleDateString('pt-BR');
     
     // Configuração inicial do documento
@@ -132,11 +168,11 @@ export default function NewLaptopLoan() {
     
     // Número do notebook em negrito
     doc.setFont("helvetica", "bold");
-    doc.text("FCBM-" + laptop?.id, 20 + doc.getTextWidth("posse e conservação do Notebook, "), 50);
+    doc.text("FCBM-" + loan.laptopId, 20 + doc.getTextWidth("posse e conservação do Notebook, "), 50);
     
     // Texto continuação
     doc.setFont("helvetica", "normal");
-    doc.text(", setorizado no setor NTI, me", 20 + doc.getTextWidth("posse e conservação do Notebook, FCBM-" + laptop?.id), 50);
+    doc.text(", setorizado no setor NTI, me", 20 + doc.getTextWidth("posse e conservação do Notebook, FCBM-" + loan.laptopId), 50);
     
     // Texto normal
     doc.text("comprometendo comunicar e aguardar a retirada do equipamento pelo Analista", 20, 60);
@@ -207,17 +243,17 @@ export default function NewLaptopLoan() {
             name="laptopId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Notebook</FormLabel>
+                <FormLabel>FCBM</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecione um notebook" />
+                      <SelectValue placeholder="Selecione o FCBM" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {LAPTOPS.filter(laptop => laptop.isAvailable).map((laptop) => (
-                      <SelectItem key={laptop.id} value={laptop.id}>
-                        {laptop.id}
+                    {LAPTOPS.map((laptop) => (
+                      <SelectItem key={laptop} value={laptop}>
+                        {laptop}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -234,8 +270,11 @@ export default function NewLaptopLoan() {
               <FormItem>
                 <FormLabel>Nome do Usuário</FormLabel>
                 <FormControl>
-                  <Input placeholder="Nome completo" {...field} />
+                  <Input placeholder="Digite o nome do usuário" {...field} />
                 </FormControl>
+                <FormDescription>
+                  Nome da pessoa que está pegando o laptop emprestado
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -246,9 +285,9 @@ export default function NewLaptopLoan() {
             name="registrationNumber"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Chapa</FormLabel>
+                <FormLabel>Chapa do funcionário</FormLabel>
                 <FormControl>
-                  <Input placeholder="Número da chapa" {...field} />
+                  <Input placeholder="Digite a chapa do funcionário" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -260,15 +299,15 @@ export default function NewLaptopLoan() {
             name="location"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Local</FormLabel>
+                <FormLabel>Localização</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecione o local" />
+                      <SelectValue placeholder="Selecione a localização" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {PREDEFINED_LOCATIONS.map((location) => (
+                    {LOCATIONS.map((location) => (
                       <SelectItem key={location} value={location}>
                         {location}
                       </SelectItem>
@@ -284,7 +323,7 @@ export default function NewLaptopLoan() {
             control={form.control}
             name="hasPointer"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                 <FormControl>
                   <Checkbox
                     checked={field.value}
@@ -292,9 +331,7 @@ export default function NewLaptopLoan() {
                   />
                 </FormControl>
                 <div className="space-y-1 leading-none">
-                  <FormLabel>
-                    Acompanha ponteira
-                  </FormLabel>
+                  <FormLabel>Ponteira</FormLabel>
                 </div>
               </FormItem>
             )}
