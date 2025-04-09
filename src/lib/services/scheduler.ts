@@ -1,6 +1,7 @@
 import { sendEmail } from '@/services/emailService';
 
-const API_URL = 'http://localhost:10000';
+// Usa a URL do servidor no Render ou localhost para desenvolvimento
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:10000';
 
 export const startReminderScheduler = () => {
   // Verifica se estamos no navegador

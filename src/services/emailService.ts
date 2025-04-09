@@ -1,4 +1,5 @@
-const API_URL = 'http://localhost:10000';
+// Usa a URL do servidor no Render ou localhost para desenvolvimento
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:10000';
 
 export const sendEmail = async (to: string, subject: string, message: string) => {
   try {

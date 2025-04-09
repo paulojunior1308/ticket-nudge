@@ -27,7 +27,27 @@ admin.initializeApp({
 const app = express();
 const port = process.env.PORT || 10000;
 
-app.use(cors());
+// Configuração do CORS para permitir requisições do frontend no Netlify
+const allowedOrigins = [
+  'http://localhost:5173', // Vite dev server
+  'https://ticket-nudge.netlify.app', // Frontend no Netlify
+  'https://ticket-nudge.netlify.app/' // Frontend no Netlify (com barra)
+];
+
+app.use(cors({
+  origin: function(origin, callback) {
+    // Permitir requisições sem origin (como mobile apps ou curl)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'A política de CORS não permite acesso deste domínio.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true
+}));
+
 app.use(express.json());
 
 const transporter = nodemailer.createTransport({
