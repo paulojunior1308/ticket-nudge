@@ -6,6 +6,8 @@ services:
     buildCommand: cd server && npm install
     startCommand: cd server && node server.js
     envVars:
+      - key: NODE_ENV
+        value: production
       - key: VITE_FIREBASE_PROJECT_ID
         sync: false
       - key: FIREBASE_CLIENT_EMAIL

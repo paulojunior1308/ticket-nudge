@@ -27,26 +27,41 @@ admin.initializeApp({
 const app = express();
 const port = process.env.PORT || 10000;
 
-// Configuração do CORS para permitir requisições do frontend no Netlify
-const allowedOrigins = [
-  'http://localhost:5173', // Vite dev server
-  'https://ticket-nudge.netlify.app', // Frontend no Netlify
-  'https://ticket-nudge.netlify.app/' // Frontend no Netlify (com barra)
-];
+// Configuração do CORS
+const isProduction = process.env.NODE_ENV === 'production';
 
-app.use(cors({
-  origin: function(origin, callback) {
-    // Permitir requisições sem origin (como mobile apps ou curl)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'A política de CORS não permite acesso deste domínio.';
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  },
-  credentials: true
-}));
+if (isProduction) {
+  // Em produção, permitir todas as origens
+  app.use(cors({
+    origin: true,
+    credentials: true
+  }));
+  console.log('CORS configurado para permitir todas as origens em produção');
+} else {
+  // Em desenvolvimento, permitir apenas origens específicas
+  const allowedOrigins = [
+    'http://localhost:5173', // Vite dev server
+    'https://ticket-nudge.netlify.app', // Frontend no Netlify
+    'https://ticket-nudge.netlify.app/', // Frontend no Netlify (com barra)
+    'https://chamados-nti.netlify.app', // Frontend no Netlify (domínio atual)
+    'https://chamados-nti.netlify.app/' // Frontend no Netlify (domínio atual com barra)
+  ];
+
+  app.use(cors({
+    origin: function(origin, callback) {
+      // Permitir requisições sem origin (como mobile apps ou curl)
+      if (!origin) return callback(null, true);
+      
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg = 'A política de CORS não permite acesso deste domínio.';
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
+    credentials: true
+  }));
+  console.log('CORS configurado para permitir apenas origens específicas em desenvolvimento');
+}
 
 app.use(express.json());
 
@@ -313,6 +328,19 @@ app.post('/send-email', async (req, res) => {
     console.error('Erro ao enviar email:', error);
     res.status(500).json({ success: false, message: 'Erro ao enviar email' });
   }
+});
+
+// Rota de teste para verificar se o servidor está funcionando
+app.get('/test', (req, res) => {
+  res.status(200).json({ 
+    success: true, 
+    message: 'Servidor funcionando corretamente',
+    timestamp: new Date().toISOString(),
+    cors: {
+      origin: req.headers.origin || 'Nenhuma origem',
+      allowed: true
+    }
+  });
 });
 
 app.listen(port, () => {
