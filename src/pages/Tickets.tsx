@@ -288,13 +288,91 @@ const Tickets = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[300px]">Usuário</TableHead>
-                  <TableHead>Departamento</TableHead>
-                  <TableHead>Data do Atendimento</TableHead>
-                  <TableHead>Problema</TableHead>
-                  <TableHead>Analista</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Lembretes</TableHead>
+                  <TableHead 
+                    className="w-[300px]"
+                    onClick={() => {
+                      if (sortField === "name") {
+                        setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+                      } else {
+                        setSortField("name");
+                        setSortDirection("asc");
+                      }
+                    }}
+                  >
+                    Usuário {sortField === "name" && (sortDirection === "asc" ? "↑" : "↓")}
+                  </TableHead>
+                  <TableHead 
+                    onClick={() => {
+                      if (sortField === "department") {
+                        setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+                      } else {
+                        setSortField("department");
+                        setSortDirection("asc");
+                      }
+                    }}
+                  >
+                    Departamento {sortField === "department" && (sortDirection === "asc" ? "↑" : "↓")}
+                  </TableHead>
+                  <TableHead 
+                    onClick={() => {
+                      if (sortField === "serviceDate") {
+                        setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+                      } else {
+                        setSortField("serviceDate");
+                        setSortDirection("asc");
+                      }
+                    }}
+                  >
+                    Data do Atendimento {sortField === "serviceDate" && (sortDirection === "asc" ? "↑" : "↓")}
+                  </TableHead>
+                  <TableHead 
+                    onClick={() => {
+                      if (sortField === "problem") {
+                        setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+                      } else {
+                        setSortField("problem");
+                        setSortDirection("asc");
+                      }
+                    }}
+                  >
+                    Problema {sortField === "problem" && (sortDirection === "asc" ? "↑" : "↓")}
+                  </TableHead>
+                  <TableHead 
+                    onClick={() => {
+                      if (sortField === "analyst") {
+                        setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+                      } else {
+                        setSortField("analyst");
+                        setSortDirection("asc");
+                      }
+                    }}
+                  >
+                    Analista {sortField === "analyst" && (sortDirection === "asc" ? "↑" : "↓")}
+                  </TableHead>
+                  <TableHead 
+                    onClick={() => {
+                      if (sortField === "ticketOpened") {
+                        setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+                      } else {
+                        setSortField("ticketOpened");
+                        setSortDirection("asc");
+                      }
+                    }}
+                  >
+                    Status {sortField === "ticketOpened" && (sortDirection === "asc" ? "↑" : "↓")}
+                  </TableHead>
+                  <TableHead 
+                    onClick={() => {
+                      if (sortField === "reminderCount") {
+                        setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+                      } else {
+                        setSortField("reminderCount");
+                        setSortDirection("asc");
+                      }
+                    }}
+                  >
+                    Lembretes {sortField === "reminderCount" && (sortDirection === "asc" ? "↑" : "↓")}
+                  </TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>

@@ -252,9 +252,9 @@ admin.firestore().collection('tickets').get()
 // Remove o envio de teste ao iniciar o servidor
 console.log('\n🚀 Servidor iniciado na porta ${port}');
 
-// Agenda o envio de lembretes para rodar uma vez por dia às 12:25
-cron.schedule('32 12 * * *', () => {
-  console.log('\n🕐 Executando verificação diária de lembretes às 12:25...');
+// Agenda o envio de lembretes para rodar uma vez por dia às 10:00
+cron.schedule('0 10 * * *', () => {
+  console.log('\n🕐 Executando verificação diária de lembretes às 10:00...');
   sendReminders();
 });
 
