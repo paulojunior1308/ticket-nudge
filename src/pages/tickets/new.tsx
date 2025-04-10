@@ -21,25 +21,25 @@ const formSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
   email: z.string().email("Email inválido"),
   department: z.string().min(1, "Departamento é obrigatório"),
-  serviceDate: z.date({
-    required_error: "Data do atendimento é obrigatória",
-  }),
+  serviceDate: z
+    .string()
+    .refine((date) => !isNaN(Date.parse(date)), "Data inválida"), // Valida se a string é uma data válida
   problem: z.string().min(1, "Descrição do problema é obrigatória"),
   analyst: z.string().min(1, "Analista é obrigatório"), // Novo campo
 });
 
 const NewTicketPage = () => {
-  const form = useForm({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      department: "",
-      serviceDate: new Date(),
-      problem: "",
-      analyst: "",
-    },
-  });
+const form = useForm({
+  resolver: zodResolver(formSchema),
+  defaultValues: {
+    name: "",
+    email: "",
+    department: "",
+    serviceDate: new Date().toISOString().split("T")[0], // Ajuste aqui
+    problem: "",
+    analyst: "",
+  },
+});
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     console.log("Dados do formulário:", values);
@@ -121,24 +121,23 @@ const NewTicketPage = () => {
 
           {/* Campo Data do Atendimento */}
           <FormField
-            control={form.control}
-            name="serviceDate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Data do Atendimento</FormLabel>
-                <FormControl>
-                  <input
-                    type="date"
-                    className="border p-2 w-full rounded"
-                    {...field}
-                    value={format(field.value, "yyyy-MM-dd")}
-                    onChange={(e) => field.onChange(new Date(e.target.value))}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+  control={form.control}
+  name="serviceDate"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Data do Atendimento</FormLabel>
+      <FormControl>
+        <input
+          type="date"
+          className="border p-2 w-full rounded"
+          value={field.value || ""} // Garante que o valor seja uma string
+          onChange={(e) => field.onChange(e.target.value)} // Mantém a data como string
+        />
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
 
           {/* Campo Descrição do Problema */}
           <FormField

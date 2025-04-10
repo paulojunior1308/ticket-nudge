@@ -61,6 +61,7 @@
     "recharts": "^2.15.2",
     "sonner": "^2.0.3",
     "tailwind-merge": "^3.2.0",
+    "ticket-nudge": "file:",
     "vaul": "^0.9.0",
     "xlsx": "^0.18.5",
     "zod": "^3.24.2"
