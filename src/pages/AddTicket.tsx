@@ -51,7 +51,9 @@ const ticketSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
   email: z.string().email("Email inválido"),
   department: z.string().min(1, "Departamento é obrigatório"),
-  serviceDate: z.date(),
+  serviceDate: z.date({
+    required_error: "Data do atendimento é obrigatória",
+  }),
   problem: z.string().min(1, "Descrição do problema é obrigatória"),
   analyst: z.string().min(1, "Analista é obrigatório"),
   status: z.enum(["Pendente", "Aberto"]),
@@ -293,6 +295,9 @@ const AddTicket = () => {
                       selected={field.value}
                       onSelect={field.onChange}
                       locale={ptBR}
+                      disabled={false}
+                      fromDate={new Date(2020, 0, 1)}
+                      toDate={new Date(2100, 11, 31)}
                       className="rounded-lg border-2 border-gray-200 p-4 bg-white shadow-lg"
                       classNames={{
                         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",

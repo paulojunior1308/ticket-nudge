@@ -184,7 +184,11 @@ export default function EditTicketPage() {
                         type="date"
                         {...field}
                         value={format(field.value, "yyyy-MM-dd")}
-                        onChange={(e) => field.onChange(new Date(e.target.value))}
+                        onChange={(e) => {
+                          const date = new Date(e.target.value);
+                          date.setHours(12, 0, 0, 0); // Define o horário para meio-dia para evitar problemas de timezone
+                          field.onChange(date);
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
