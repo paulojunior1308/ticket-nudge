@@ -287,46 +287,20 @@ const AddTicket = () => {
               control={form.control}
               name="serviceDate"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
+                <FormItem>
                   <FormLabel className="text-gray-700">Data do Atendimento</FormLabel>
-                  <div className="flex flex-col items-center bg-gray-50 p-4 rounded-lg">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      locale={ptBR}
-                      disabled={false}
-                      fromDate={new Date(2020, 0, 1)}
-                      toDate={new Date(2100, 11, 31)}
-                      className="rounded-lg border-2 border-gray-200 p-4 bg-white shadow-lg"
-                      classNames={{
-                        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-                        month: "space-y-4",
-                        caption: "flex justify-center pt-1 relative items-center text-lg font-semibold",
-                        caption_label: "text-gray-900",
-                        nav: "space-x-1 flex items-center",
-                        nav_button: "h-9 w-9 bg-transparent p-0 opacity-75 hover:opacity-100 hover:bg-gray-100 rounded-full transition-colors",
-                        nav_button_previous: "absolute left-1",
-                        nav_button_next: "absolute right-1",
-                        table: "w-full border-collapse space-y-1",
-                        head_row: "flex",
-                        head_cell: "text-gray-500 rounded-md w-10 font-normal text-sm",
-                        row: "flex w-full mt-2",
-                        cell: "text-center text-sm relative p-0 hover:bg-gray-100 rounded-md transition-colors",
-                        day: "h-10 w-10 p-0 font-normal aria-selected:opacity-100 hover:bg-gray-200 rounded-md transition-colors",
-                        day_selected: "bg-blue-600 text-white hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white rounded-md font-bold shadow-lg ring-2 ring-blue-600 ring-offset-2",
-                        day_today: "bg-gray-100 text-gray-900 rounded-md font-semibold border-2 border-gray-300",
-                        day_outside: "text-gray-400 opacity-50",
-                        day_disabled: "text-gray-400 opacity-50 cursor-not-allowed",
-                        day_hidden: "invisible",
+                  <FormControl>
+                    <Input
+                      type="date"
+                      className="w-[200px] border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                      value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                      onChange={(e) => {
+                        const [year, month, day] = e.target.value.split('-').map(Number);
+                        const date = new Date(year, month - 1, day, 12, 0, 0);
+                        field.onChange(date);
                       }}
                     />
-                    <div className="mt-4 text-center">
-                      <p className="text-gray-700 font-medium">
-                        Data selecionada: {field.value ? format(field.value, "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : "Nenhuma data selecionada"}
-                      </p>
-                    </div>
-                  </div>
+                  </FormControl>
                   <FormMessage className="text-red-500" />
                 </FormItem>
               )}

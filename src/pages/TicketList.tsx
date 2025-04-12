@@ -87,11 +87,11 @@ const TicketList = () => {
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
-  const handleTicketStatusChange = async (id: string, currentStatus: boolean) => {
+  const handleTicketStatusChange = async (id: string, currentStatus: string) => {
     try {
       await updateTicket(id, { 
-        ticketOpened: !currentStatus,
-        status: currentStatus ? 'Pendente' : 'Aberto'
+        status: currentStatus === 'Aberto' ? 'Pendente' : 'Aberto',
+        ticketOpened: currentStatus === 'Aberto' ? false : true
       });
       toast.success("Status do atendimento atualizado com sucesso!");
     } catch (error) {
@@ -404,7 +404,7 @@ const TicketList = () => {
                     <TableCell className="text-center max-w-[300px] truncate">{ticket.problem || '-'}</TableCell>
                     <TableCell className="text-center">{ticket.analyst || '-'}</TableCell>
                     <TableCell className="text-center">
-                      {ticket.ticketOpened ? (
+                      {ticket.status === 'Aberto' ? (
                         <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
                           <Check className="mr-1 h-3 w-3" /> Aberto
                         </Badge>
@@ -506,12 +506,12 @@ const TicketList = () => {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => handleTicketStatusChange(ticket.id, ticket.ticketOpened)}
+                                onClick={() => handleTicketStatusChange(ticket.id, ticket.status)}
                                 className={`hover:bg-primary/10 hover:text-primary text-muted-foreground ${
-                                  ticket.ticketOpened ? 'text-green-600' : 'text-red-600'
+                                  ticket.status === 'Aberto' ? 'text-green-600' : 'text-red-600'
                                 }`}
                               >
-                                {ticket.ticketOpened ? (
+                                {ticket.status === 'Aberto' ? (
                                   <Check className="h-4 w-4" />
                                 ) : (
                                   <X className="h-4 w-4" />
@@ -519,7 +519,7 @@ const TicketList = () => {
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>{ticket.ticketOpened ? 'Marcar como Pendente' : 'Marcar como Aberto'}</p>
+                              <p>{ticket.status === 'Aberto' ? 'Marcar como Pendente' : 'Marcar como Aberto'}</p>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>

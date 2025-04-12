@@ -182,11 +182,11 @@ export default function EditTicketPage() {
                     <FormControl>
                       <Input
                         type="date"
-                        {...field}
-                        value={format(field.value, "yyyy-MM-dd")}
+                        className="w-[200px] border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                        value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
                         onChange={(e) => {
-                          const date = new Date(e.target.value);
-                          date.setHours(12, 0, 0, 0); // Define o horário para meio-dia para evitar problemas de timezone
+                          const [year, month, day] = e.target.value.split('-').map(Number);
+                          const date = new Date(year, month - 1, day, 12, 0, 0);
                           field.onChange(date);
                         }}
                       />

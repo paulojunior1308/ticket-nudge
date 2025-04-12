@@ -132,7 +132,8 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         createdAt: now,
         updatedAt: now,
         reminderCount: 0,
-        status: ticketData.status || 'Pendente'
+        status: 'Pendente',
+        ticketOpened: false
       };
 
       await addDoc(collection(db, 'tickets'), newTicket);
