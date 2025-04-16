@@ -133,18 +133,18 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         updatedAt: now,
         reminderCount: 0,
         status: 'Pendente',
-        ticketOpened: false
+        ticketOpened: false,
+        lastReminderSent: now
       };
 
-      await addDoc(collection(db, 'tickets'), newTicket);
+      const docRef = await addDoc(collection(db, 'tickets'), newTicket);
       
-      // Enviar email de confirmação
       const emailMessage = `
 <!DOCTYPE html>
 <html>
 <head>
     <style>
-        body {
+body {
             font-family: Arial, sans-serif;
             line-height: 1.6;
             color: #333;
@@ -222,9 +222,8 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         <div class="header">
             <h2>Olá, ${ticketData.name}! 👋</h2>
         </div>
-        
         <div class="content">
-            <p>Esperamos que esteja tendo um ótimo dia! Passando para compartilhar os detalhes do atendimento que <span style="font-weight: bold; font-size: 1.1em; color: #2563eb;">${ticketData.analyst}</span> realizou recentemente.</p>
+             <p>Esperamos que esteja tendo um ótimo dia! Passando para compartilhar os detalhes do atendimento que <span style="font-weight: bold; font-size: 1.1em; color: #2563eb;">${ticketData.analyst}</span> realizou recentemente.</p>
             
             <div class="details">
                 <div class="details-item">
@@ -262,9 +261,10 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       
       await fetchData();
       toast.success("Atendimento adicionado com sucesso");
-    } catch (err) {
+    } catch (error) {
+      console.error('Erro ao adicionar ticket:', error);
       toast.error("Erro ao adicionar atendimento");
-      setError(err instanceof Error ? err.message : 'Erro ao adicionar ticket');
+      throw error;
     }
   };
 
