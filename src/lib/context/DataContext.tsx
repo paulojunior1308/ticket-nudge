@@ -10,7 +10,7 @@ import { sendEmail } from "@/services/emailService";
 interface FilterOptions {
   search: string;
   department: string;
-  status: string;
+  status: 'all' | 'Aberto' | 'Pendente';
   recurring: boolean;
 }
 
@@ -55,8 +55,8 @@ export const DataContext = createContext<DataContextType>({
   },
   filterOptions: {
     search: '',
-    department: '',
-    status: '',
+    department: 'all',
+    status: 'all',
     recurring: false
   },
   sortField: 'createdAt',
@@ -90,8 +90,8 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState<string | null>(null);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     search: '',
-    department: '',
-    status: '',
+    department: 'all',
+    status: 'all',
     recurring: false
   });
   const [sortField, setSortField] = useState<keyof Ticket>('createdAt');
@@ -338,14 +338,12 @@ body {
         ticket.name.toLowerCase().includes(filterOptions.search.toLowerCase()) ||
         ticket.email.toLowerCase().includes(filterOptions.search.toLowerCase());
 
-      const matchesDepartment = filterOptions.department === 'todos' || 
-        !filterOptions.department || 
+      const matchesDepartment = filterOptions.department === 'all' || 
         ticket.department === filterOptions.department;
 
-      const matchesStatus = filterOptions.status === 'todos' || 
-        !filterOptions.status ||
-        (filterOptions.status === 'open' && ticket.ticketOpened) ||
-        (filterOptions.status === 'pending' && !ticket.ticketOpened);
+      const matchesStatus = filterOptions.status === 'all' ||
+        (filterOptions.status === 'Aberto' && ticket.ticketOpened) ||
+        (filterOptions.status === 'Pendente' && !ticket.ticketOpened);
 
       return matchesSearch && matchesDepartment && matchesStatus;
     });

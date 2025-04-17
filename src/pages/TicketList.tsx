@@ -1,6 +1,6 @@
 import { useData } from "@/lib/context/DataContext";
 import { Button } from "@/components/ui/button";
-import { Plus, Check, X, Trash2, AlertTriangle, Mail, Pencil, ArrowUpDown } from "lucide-react";
+import { Plus, Check, X, Trash2, AlertTriangle, Mail, Pencil, ArrowUpDown, Download } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Table,
@@ -36,10 +36,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useState } from "react";
 import { sendEmail } from "@/services/emailService";
+import * as XLSX from 'xlsx';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface Ticket {
   id: string;
@@ -79,6 +91,11 @@ const TicketList = () => {
   const [editingExternalId, setEditingExternalId] = useState<string | null>(null);
   const [newExternalId, setNewExternalId] = useState("");
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'serviceDate', direction: 'desc' });
+  const [exportFilters, setExportFilters] = useState({
+    department: '',
+    status: ''
+  });
+  const [showExportDialog, setShowExportDialog] = useState(false);
 
   // Obter departamentos únicos para o filtro
   const departments = [...new Set(tickets.map(ticket => ticket.department))];
@@ -112,7 +129,7 @@ const TicketList = () => {
     setFilterOptions(prev => ({ ...prev, department: value }));
   };
 
-  const handleStatusFilter = (value: string) => {
+  const handleStatusFilter = (value: 'all' | 'Aberto' | 'Pendente') => {
     setFilterOptions(prev => ({ ...prev, status: value }));
   };
 
@@ -213,6 +230,52 @@ const TicketList = () => {
     });
   };
 
+  const handleExportToExcel = () => {
+    try {
+      // Filtrar os tickets baseado nos critérios selecionados
+      const filteredTickets = tickets.filter(ticket => {
+        const matchesDepartment = !exportFilters.department || ticket.department === exportFilters.department;
+        const matchesStatus = !exportFilters.status || ticket.status === exportFilters.status;
+        return matchesDepartment && matchesStatus;
+      });
+
+      // Preparar os dados para exportação
+      const exportData = filteredTickets.map(ticket => ({
+        'ID': ticket.id,
+        'Nome': ticket.name,
+        'Email': ticket.email,
+        'Departamento': ticket.department,
+        'Data do Atendimento': format(new Date(ticket.serviceDate), 'dd/MM/yyyy', { locale: ptBR }),
+        'Status': ticket.status,
+        'Analista': ticket.analyst || '',
+        'Problema': ticket.problem || '',
+        'Lembretes Enviados': ticket.reminderCount || 0,
+        'Último Lembrete': ticket.lastReminderSent 
+          ? format(new Date(ticket.lastReminderSent), 'dd/MM/yyyy HH:mm', { locale: ptBR })
+          : '-',
+        'Criado em': format(new Date(ticket.createdAt), 'dd/MM/yyyy HH:mm', { locale: ptBR }),
+        'Atualizado em': format(new Date(ticket.updatedAt), 'dd/MM/yyyy HH:mm', { locale: ptBR })
+      }));
+
+      // Criar planilha Excel
+      const ws = XLSX.utils.json_to_sheet(exportData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Atendimentos');
+
+      // Gerar nome do arquivo com data atual
+      const fileName = `atendimentos_${format(new Date(), 'dd-MM-yyyy_HH-mm')}.xlsx`;
+
+      // Fazer o download
+      XLSX.writeFile(wb, fileName);
+      
+      toast.success('Planilha exportada com sucesso!');
+      setShowExportDialog(false);
+    } catch (error) {
+      console.error('Erro ao exportar planilha:', error);
+      toast.error('Erro ao exportar planilha');
+    }
+  };
+
   if (isLoading) {
     return <div>Carregando...</div>;
   }
@@ -227,9 +290,74 @@ const TicketList = () => {
           </p>
         </div>
         <div className="flex gap-2">
+          <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Download className="w-4 h-4 mr-2" />
+                Exportar
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Exportar Atendimentos</DialogTitle>
+                <DialogDescription>
+                  Selecione os filtros para exportar os atendimentos para Excel
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <label className="text-right">Departamento</label>
+                  <Select
+                    value={exportFilters.department}
+                    onValueChange={(value) => setExportFilters(prev => ({ ...prev, department: value }))}
+                  >
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Todos os departamentos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      {departments.map((dept) => (
+                        <SelectItem key={dept} value={dept}>
+                          {dept}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <label className="text-right">Status</label>
+                  <Select
+                    value={exportFilters.status}
+                    onValueChange={(value) => setExportFilters(prev => ({ ...prev, status: value }))}
+                  >
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Todos os status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="Pendente">Pendente</SelectItem>
+                      <SelectItem value="Aberto">Aberto</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+                  Cancelar
+                </Button>
+                <Button onClick={handleExportToExcel}>
+                  Exportar
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
           <Button asChild>
             <Link to="/tickets/new">
-              <Plus className="mr-2 h-4 w-4" />
+              <Plus className="w-4 h-4 mr-2" />
               Novo Atendimento
             </Link>
           </Button>
@@ -257,7 +385,7 @@ const TicketList = () => {
                   <SelectValue placeholder="Departamento" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="todos">Todos</SelectItem>
+                  <SelectItem value="all">Todos</SelectItem>
                   {departments.map((dept) => (
                     <SelectItem key={dept} value={dept}>
                       {dept}
@@ -275,9 +403,9 @@ const TicketList = () => {
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="todos">Todos</SelectItem>
-                  <SelectItem value="open">Abertos</SelectItem>
-                  <SelectItem value="pending">Pendentes</SelectItem>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="Pendente">Pendente</SelectItem>
+                  <SelectItem value="Aberto">Aberto</SelectItem>
                 </SelectContent>
               </Select>
             </div>

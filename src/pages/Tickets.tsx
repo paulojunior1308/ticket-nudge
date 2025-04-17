@@ -157,7 +157,7 @@ const Tickets = () => {
                 value={filterOptions.status}
                 onValueChange={(value) => setFilterOptions(prev => ({ 
                   ...prev, 
-                  status: value as "all" | "opened" | "pending" 
+                  status: value as "all" | "Aberto" | "Pendente" 
                 }))}
               >
                 <SelectTrigger id="status">
