@@ -7,7 +7,11 @@ const cron = require('node-cron');
 
 // Inicializa o Firebase Admin
 admin.initializeApp({
-  credential: admin.credential.applicationDefault()
+  credential: admin.credential.cert({
+    projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
+  })
 });
 
 const app = express();
@@ -77,7 +81,6 @@ const sendReminders = async () => {
     
     const snapshot = await ticketsRef
       .where('status', '==', 'Pendente')
-      .where('lastReminderSent', '<', hoje.toISOString())
       .get();
 
     console.log(`Total de tickets pendentes: ${snapshot.size}`);
@@ -89,6 +92,7 @@ const sendReminders = async () => {
 
     let ticketsProcessados = 0;
     let emailsEnviados = 0;
+    let ticketsJaNotificados = 0;
 
     for (const doc of snapshot.docs) {
       const ticket = { id: doc.id, ...doc.data() };
@@ -98,6 +102,16 @@ const sendReminders = async () => {
       console.log(`- Nome: ${ticket.name}`);
       console.log(`- Email: ${ticket.email}`);
       console.log(`- Último lembrete: ${ticket.lastReminderSent || 'Nunca'}`);
+
+      // Verifica se já enviamos lembrete hoje
+      if (ticket.lastReminderSent) {
+        const ultimoLembrete = new Date(ticket.lastReminderSent);
+        if (ultimoLembrete.toDateString() === hoje.toDateString()) {
+          console.log(`⏭️ Pulando ticket ${ticket.id} - já recebeu lembrete hoje`);
+          ticketsJaNotificados++;
+          continue;
+        }
+      }
 
       const emailMessage = `
 <!DOCTYPE html>
@@ -159,6 +173,7 @@ const sendReminders = async () => {
     console.log('Resumo do processamento:');
     console.log(`- Tickets pendentes verificados: ${ticketsProcessados}`);
     console.log(`- Emails enviados: ${emailsEnviados}`);
+    console.log(`- Tickets já notificados hoje: ${ticketsJaNotificados}`);
     console.log('====================================\n');
 
   } catch (error) {
@@ -189,10 +204,19 @@ app.get('/check-reminders', async (req, res) => {
   try {
     console.log('\n📧 Verificação manual solicitada...');
     await sendReminders();
-    res.status(200).json({ success: true, message: 'Verificação concluída' });
+    res.status(200).json({ 
+      success: true, 
+      message: 'Verificação concluída',
+      timestamp: new Date().toISOString()
+    });
   } catch (error) {
     console.error('❌ Erro na verificação manual:', error);
-    res.status(500).json({ success: false, message: 'Erro ao verificar lembretes' });
+    res.status(500).json({ 
+      success: false, 
+      message: 'Erro ao verificar lembretes',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
   }
 });
 
@@ -233,5 +257,5 @@ app.get('/test', (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Servidor rodando na porta ${port}`);
+  console.log(`\n🚀 Servidor iniciado na porta ${port}`);
 }); 
