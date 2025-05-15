@@ -118,7 +118,7 @@ const sendReminders = async () => {
 <html>
 <head>
     <style>
-body {
+        body {
             font-family: Arial, sans-serif;
             line-height: 1.6;
             color: #333;
@@ -194,23 +194,23 @@ body {
 <body>
     <div class="container">
         <div class="header">
-            <h2>Olá, ${ticketData.name}! 👋</h2>
+            <h2>Olá, ${ticket.name}! 👋</h2>
         </div>
         <div class="content">
-             <p>Esperamos que esteja tendo um ótimo dia! Passando para compartilhar os detalhes do atendimento que <span style="font-weight: bold; font-size: 1.1em; color: #2563eb;">${ticketData.analyst}</span> realizou recentemente.</p>
+            <p>Esperamos que esteja tendo um ótimo dia! Passando para compartilhar os detalhes do atendimento que <span style="font-weight: bold; font-size: 1.1em; color: #2563eb;">${ticket.analyst}</span> realizou recentemente.</p>
             
             <div class="details">
                 <div class="details-item">
                     <span class="details-label">Data:</span>
-                    <span>${new Date(ticketData.serviceDate).toLocaleDateString('pt-BR')}</span>
+                    <span>${new Date(ticket.serviceDate).toLocaleDateString('pt-BR')}</span>
                 </div>
                 <div class="details-item">
                     <span class="details-label">Departamento:</span>
-                    <span>${ticketData.department}</span>
+                    <span>${ticket.department}</span>
                 </div>
                 <div class="details-item">
                     <span class="details-label">Solução Realizada:</span>
-                    <span>${ticketData.problem}</span>
+                    <span>${ticket.problem}</span>
                 </div>
             </div>
 
@@ -276,10 +276,12 @@ admin.firestore().collection('tickets').get()
 // Remove o envio de teste ao iniciar o servidor
 console.log('\n🚀 Servidor iniciado na porta ${port}');
 
-// Agenda o envio de lembretes para rodar uma vez por dia às 10:00
+// Configuração do cron para rodar às 10h no timezone de São Paulo
 cron.schedule('0 10 * * *', () => {
   console.log('\n🕐 Executando verificação diária de lembretes às 10:00...');
   sendReminders();
+}, {
+  timezone: 'America/Sao_Paulo'
 });
 
 // Rota para verificação manual (apenas para testes)

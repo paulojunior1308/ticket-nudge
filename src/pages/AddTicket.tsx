@@ -230,6 +230,7 @@ const AddTicket = () => {
                         <SelectItem value="Piscina">Piscina</SelectItem>
                         <SelectItem value="Programação">Programação</SelectItem>
                         <SelectItem value="RH">RH</SelectItem>
+                        <SelectItem value="Saída do Restaurante">Saída do Restaurante</SelectItem>
                         <SelectItem value="Secretaria">Secretaria</SelectItem>
                         <SelectItem value="Serviços">Serviços</SelectItem>
                         <SelectItem value="Tesouraria">Tesouraria</SelectItem>
